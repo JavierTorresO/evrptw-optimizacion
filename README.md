@@ -28,7 +28,7 @@ El desarrollo está organizado en tickets secuenciales. Cualquier integrante dis
 
 ### Ticket 4: Implementación del Modelo (`src/model.py`)
 * **Entrada:** Usar `load_evrptw_instance()` desde `src/parser.py`, que entrega las llaves `V`, `V_0`, `V_C`, `V_R`, `nodes`, `dist`, `time`, `energy`, `Q_bat`, `C_cap`, `h_rate`, `g_rate`.
-* **Implementación:** Traducir exactamente las 12 restricciones y las cotas $M^{(1)}_{ij}$ y $M^{(2)}_{rj}$ definidas en `modelo_matematico.md` (recordar crear el nodo virtual de retorno `depot_end = len(V)`).
+* **Implementación:** Traducir exactamente las 12 restricciones y las cotas M<sup>(1)</sup><sub>ij</sub> y M<sup>(2)</sup><sub>rj</sub> definidas en `modelo_matematico.md` (recordar crear el nodo virtual de retorno `depot_end = len(V)`).
 * **Salida:** Exportar un `.json` en `/results` con arcos activos ($x_{ijk}=1$), tiempos $T_{ik}$, niveles de batería $Y_{ik}$, valor objetivo, cota dual, *MIP Gap* y tiempo de CPU.
 
 ### Ticket 5: Validación en Instancias Reducidas ($n=5$ y $n=10$)
