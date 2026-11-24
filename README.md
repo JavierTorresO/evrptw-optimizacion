@@ -17,7 +17,7 @@ El desarrollo está organizado en tickets secuenciales. Cualquier integrante dis
 | **T1** | Entorno, repo Git y verificación de solvers | ✅ Completado | — | Repo listo, `venv` operativo en local; validar licencia CPLEX al conectar a `chome`. |
 | **T2** | Parser de instancias Schneider (2014) | ✅ Completado | — | `src/parser.py` operativo con replicación de estaciones y recorte dinámico. |
 | **T3** | Cierre algebraico y cotas Big-M | ✅ Completado | — | Formulación PLEM completa documentada en `modelo_matematico.md`. |
-| **T4** | Implementación PLEM en **Gurobi y CPLEX** | ⬜ Pendiente | T1, T2, T3 | Scripts `src/model_gurobi.py` y `src/model_cplex.py` con `TimeLimit=3600s`. |
+| **T4** | Implementación PLEM en **Gurobi y CPLEX** | ✅ Completado | T1, T2, T3 | Scripts `src/model_gurobi.py` y `src/model_cplex.py` con `TimeLimit=3600s`. |
 | **T5** | Validación Toy y **Diseño de Instancias (≥3/cat)** | ⬜ Pendiente | T4 | Óptimo idéntico en ambos solvers ($n=5, 10$) y batería de ≥3 instancias por característica. |
 | **T6** | Benchmarking **Gurobi vs. CPLEX** en `chome` | ⬜ Pendiente | T5 | Tabla CSV con Tiempo, *MIPGap (%)* y *Best Objective* para ambos solvers (≤1 hr). |
 | **T7** | Análisis Crítico: **Supuestos, Limitaciones y Solvers** | ⬜ Pendiente | T6 | Evaluación crítica de supuestos del modelo y comparación de escalabilidad Gurobi/CPLEX. |
