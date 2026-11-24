@@ -4,43 +4,59 @@
 **Equipo:** Grupo 4 (Martín González, Mariel Muñoz, Javier Cadagán, Jhostian San Martín, Javier Torres)  
 **Docente:** Dra. Rosa Medina Durán  
 
-Implementación y análisis computacional de un modelo de Programación Lineal Entera Mixta (PLEM) para el **Problema de Ruteo de Vehículos Eléctricos con Ventanas de Tiempo y Estaciones de Recarga Intermedias (E-VRPTW)** basado en Schneider et al. (2014).
+Implementación y comparación computacional (Gurobi vs. CPLEX) de un modelo de Programación Lineal Entera Mixta (PLEM) para el **Problema de Ruteo de Vehículos Eléctricos con Ventanas de Tiempo y Estaciones de Recarga Intermedias (E-VRPTW)** basado en Schneider et al. (2014).
 
 ---
 
-## 1. Tablero de Avance y Plan de Trabajo Secuencial
+## 1. Tablero de Avance y Plan de Trabajo (Alineado a Rúbrica Final)
 
 El desarrollo está organizado en tickets secuenciales. Cualquier integrante disponible puede tomar el siguiente ticket abierto respetando las dependencias:
 
-| Ticket | Tarea | Estado | Depende de | Entregable / Criterio de Cierre |
+| Ticket | Tarea | Estado | Depende de | Entregable / Criterio de Cierre (Rúbrica) |
 | :--- | :--- | :---: | :---: | :--- |
-| **T1** | Entorno, repositorio Git y verificación de solver | ✅ Completado | — | Repo configurado, `.gitignore` activo, `venv` con `gurobipy` validado en local. |
-| **T2** | Descarga y parser de instancias Schneider (2014) | ✅ Completado | — | Datasets en `/data` (`c101_21`, `r101_21`, `rc101_21`) y `src/parser.py` operativo. |
+| **T1** | Entorno, repo Git y verificación de solvers | ✅ Completado | — | Repo listo, `venv` operativo en local; validar licencia CPLEX al conectar a `chome`. |
+| **T2** | Parser de instancias Schneider (2014) | ✅ Completado | — | `src/parser.py` operativo con replicación de estaciones y recorte dinámico. |
 | **T3** | Cierre algebraico y cotas Big-M | ✅ Completado | — | Formulación PLEM completa documentada en `modelo_matematico.md`. |
-| **T4** | Codificación del modelo PLEM (`src/model.py`) | ⬜ Pendiente | T1, T2, T3 | Modelo implementado en `gurobipy` leyendo el diccionario de `parser.py`. |
-| **T5** | Validación y auditoría en instancias Toy ($n=5, 10$) | ⬜ Pendiente | T4 | Solución óptima verificada sin subtours, con recargas y cumplimiento de ventanas. |
-| **T6** | Benchmarking en `chome.inf.udec.cl` ($n=25, 50$) | ⬜ Pendiente | T5 | Corridas ejecutadas en servidor; métricas y *MIP Gap* guardados en `/results`. |
-| **T7** | Visualización de rutas e informe/presentación final | ⬜ Pendiente | T5, T6 | Gráficos 2D de rutas, perfiles de batería (SoC) y entrega final cerrada. |
+| **T4** | Implementación PLEM en **Gurobi y CPLEX** | ⬜ Pendiente | T1, T2, T3 | Scripts `src/model_gurobi.py` y `src/model_cplex.py` con `TimeLimit=3600s`. |
+| **T5** | Validación Toy y **Diseño de Instancias (≥3/cat)** | ⬜ Pendiente | T4 | Óptimo idéntico en ambos solvers ($n=5, 10$) y batería de ≥3 instancias por característica. |
+| **T6** | Benchmarking **Gurobi vs. CPLEX** en `chome` | ⬜ Pendiente | T5 | Tabla CSV con Tiempo, *MIPGap (%)* y *Best Objective* para ambos solvers (≤1 hr). |
+| **T7** | Análisis Crítico: **Supuestos, Limitaciones y Solvers** | ⬜ Pendiente | T6 | Evaluación crítica de supuestos del modelo y comparación de escalabilidad Gurobi/CPLEX. |
+| **T8** | Visualización de Rutas y Métricas (`visualize.py`) | ⬜ Pendiente | T6 | Mapas 2D de rutas, perfiles de batería (SoC) y gráficos comparativos de desempeño. |
+| **T9** | **Presentación Final (~15 min) + Guion Equilibrado** | ⬜ Pendiente | T7, T8 | Diapositivas completas, guion cronometrado (3 min/integrante) y preparación de Q&A. |
 
 ---
 
-## 2. Especificación de los Próximos Tickets
+## 2. Especificación Técnica de los Próximos Tickets
 
-### Ticket 4: Implementación del Modelo (`src/model.py`)
-* **Entrada:** Usar `load_evrptw_instance()` desde `src/parser.py`, que entrega las llaves `V`, `V_0`, `V_C`, `V_R`, `nodes`, `dist`, `time`, `energy`, `Q_bat`, `C_cap`, `h_rate`, `g_rate`.
-* **Implementación:** Traducir exactamente las 12 restricciones y las cotas M<sup>(1)</sup><sub>ij</sub> y M<sup>(2)</sup><sub>rj</sub> definidas en `modelo_matematico.md` (recordar crear el nodo virtual de retorno `depot_end = len(V)`).
-* **Salida:** Exportar un `.json` en `/results` con arcos activos ($x_{ijk}=1$), tiempos $T_{ik}$, niveles de batería $Y_{ik}$, valor objetivo, cota dual, *MIP Gap* y tiempo de CPU.
+### Ticket 4: Codificación Dual del Modelo (`model_gurobi.py` y `model_cplex.py`)
+* **Entrada:** Usar `load_evrptw_instance()` desde `src/parser.py`.
+* **Implementación:** Programar exactamente las 12 restricciones y cotas M<sup>(1)</sup><sub>ij</sub> y M<sup>(2)</sup><sub>rj</sub> de `modelo_matematico.md` en ambos solvers (`gurobipy` y `docplex`), fijando un límite máximo de ejecución de **3600 segundos (1 hora)** por instancia.
+* **Salida estandarizada:** Ambos scripts deben exportar un `.json` en `/results` con la misma estructura: `solver`, `instance`, `n_customers`, `status`, `best_objective`, `best_bound`, `mip_gap`, `cpu_time`, `nodes_explored` y rutas activas.
 
-### Ticket 5: Validación en Instancias Reducidas ($n=5$ y $n=10$)
-* Recortar instancias usando `max_customers=5` y `max_customers=10` en `load_evrptw_instance()`.
-* Verificar que ningún vehículo viole $[e_i, l_i]$, que no existan subtours y que, al reducir $Q_{\text{bat}}$, los vehículos se desvíen efectivamente a nodos de `V_R` sumando el tiempo de recarga $\Delta t_r = g(Q_{\text{bat}} - Y_{rk})$.
+### Ticket 5: Validación Toy y Diseño de Batería de Instancias (Mínimo 3 por característica)
+* **Validación cruzada ($n=5, 10$):** Correr Gurobi y CPLEX sobre los mismos subconjuntos pequeños y confirmar que ambos alcanzan exactamente el mismo valor objetivo sin subtours ni violaciones de batería/tiempo.
+* **Diseño de instancias (Criterio Rúbrica):** Seleccionar y documentar **al menos 3 instancias por cada característica** evaluada (ej. 3 instancias Agrupadas `c101, c102, c103`, 3 Aleatorias `r101, r102, r103` y 3 Mixtas `rc101, rc102, rc103`, evaluadas en escalas de $n=15$ y $n=25$), justificando cómo cada característica desafía el ruteo y la autonomía.
 
-### Ticket 6: Experimentación en Servidor DIICC ($n=25$ y $n=50$)
-* Clonar o actualizar el repositorio en `chome.inf.udec.cl` y ejecutar dentro de `tmux`.
-* Evaluar instancias agrupadas (`c101_21`), aleatorias (`r101_21`) y mixtas (`rc101_21`) con límite de tiempo definido, consolidando los resultados en `results/benchmark_summary.csv`.
+### Ticket 6: Benchmarking Comparativo en Servidor DIICC (`chome.inf.udec.cl`)
+* Verificar `cplex` y `gurobi_cl` en `chome.inf.udec.cl` y lanzar el script maestro `src/benchmark.py` dentro de `tmux`.
+* Consolidar todas las corridas en `results/comparacion_solvers.csv` reportando obligatoriamente para Gurobi y CPLEX: **Tiempo de cómputo (s), MIPGap (%) y Best objective / incumbent**.
 
-### Ticket 7: Visualización y Entrega Final
-* Crear `src/visualize.py` para graficar los mapas de rutas (depósito, clientes y estaciones visitadas) y las curvas de estado de carga de batería ($Y_{ik}$) por vehículo.
+### Ticket 7: Evaluación Crítica de Supuestos, Limitaciones y Escalabilidad
+* Redactar en `analisis_resultados.md` dos bloques clave exigidos por la pauta:
+  1. **Supuestos y Limitaciones:** Evaluar críticamente el impacto operativo de asumir recarga completa obligatoria ($Q_{\text{bat}}$), tasa de consumo lineal independiente de la carga transportada, velocidad constante y ausencia de colas en estaciones.
+  2. **Comparación Gurobi vs. CPLEX:** Analizar diferencias en cierre de brecha (*MIPGap*), calidad de cotas duales, velocidad de exploración de nodos y punto de quiebre al escalar el tamaño de instancia.
+
+### Ticket 8: Visualización de Rutas y Comparativas (`src/visualize.py`)
+* Generar figuras limpias para las diapositivas: mapas 2D de rutas (depósito, clientes y estaciones usadas), curvas de evolución de batería ($Y_{ik}$) y gráficos de barras/líneas comparando tiempos y *MIPGap* entre Gurobi y CPLEX.
+
+### Ticket 9: Presentación Final (~15 min) y Guion del Equipo
+* Armar las diapositivas cubriendo todos los bloques de la rúbrica:
+  1. **Integración de correcciones previas:** Evolución desde VRPTW hacia E-VRPTW (Schneider et al., 2014) y estructura del equipo.
+  2. **Modelo matemático PLEM:** Conjuntos, parámetros, variables, función objetivo y restricciones clave.
+  3. **Supuestos y limitaciones:** Justificación e impacto crítico.
+  4. **Diseño y diversidad de instancias:** Justificación de las ≥3 instancias por característica.
+  5. **Resultados y comparación Gurobi vs. CPLEX:** Tablas con Tiempo, *MIPGap* y *Best Objective* (límite 1 hr) + análisis de escalabilidad.
+* Redactar un **guion cronometrado de 15 minutos totales** (~3 minutos por cada uno de los 5 integrantes) y un anexo con posibles preguntas de la profesora.
 
 ---
 
@@ -51,10 +67,13 @@ evrptw-optimizacion/
 ├── data/                    # Instancias estándar de Schneider et al. (.txt)
 ├── src/
 │   ├── parser.py            # Lectura de instancias, replicación de estaciones y matrices
-│   ├── model.py             # (Ticket 4) Formulación PLEM en GurobiPy
-│   └── visualize.py         # (Ticket 7) Gráficos de rutas y perfiles de batería
-├── results/                 # Logs del solver, soluciones .json y tablas .csv
+│   ├── model_gurobi.py      # (Ticket 4) Formulación PLEM en GurobiPy
+│   ├── model_cplex.py       # (Ticket 4) Formulación PLEM en DOcplex (CPLEX)
+│   ├── benchmark.py         # (Ticket 6) Ejecución automatizada Gurobi vs. CPLEX
+│   └── visualize.py         # (Ticket 8) Gráficos de rutas, SoC y comparativas
+├── results/                 # Logs, soluciones .json y comparacion_solvers.csv
 ├── modelo_matematico.md     # Definición algebraica formal y cotas Big-M
+├── analisis_resultados.md   # (Ticket 7) Supuestos, limitaciones y análisis comparativo
 └── README.md                # Plan de trabajo y guía de ejecución
 ```
 
@@ -62,14 +81,14 @@ evrptw-optimizacion/
 
 ## 4. Instalación Local y Acceso al Servidor (`chome.inf.udec.cl`)
 
-### Ejecución en equipo local (Windows / Linux / Mac)
+### Ejecución en equipo local
 ```bash
-git clone https://github.com/JavierTorresO/evrptw-optimizacion.git
+git clone [https://github.com/JavierTorresO/evrptw-optimizacion.git](https://github.com/JavierTorresO/evrptw-optimizacion.git)
 cd evrptw-optimizacion
 python -m venv venv
-# Activar entorno (Windows PowerShell): .\venv\Scripts\Activate.ps1
-# Activar entorno (Linux/Mac): source venv/bin/activate
-pip install gurobipy numpy pandas matplotlib
+# Windows PowerShell: .\venv\Scripts\Activate.ps1
+# Linux/Mac: source venv/bin/activate
+pip install gurobipy docplex cplex numpy pandas matplotlib
 python src/parser.py
 ```
 
@@ -77,4 +96,4 @@ python src/parser.py
 ```bash
 ssh grupo04@chome.inf.udec.cl
 ```
-*(La contraseña de la cuenta `grupo04` se resguarda localmente en `credenciales_servidor.txt` —ignorado por Git— y en el chat de coordinación del equipo. Para corridas largas en el servidor, utilizar `tmux new -s evrptw`).*
+*(La contraseña de `grupo04` se resguarda localmente en `credenciales_servidor.txt` —ignorado por Git— y en el chat de coordinación del equipo. Usar `tmux new -s evrptw` para experimentos largos).*
