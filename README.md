@@ -49,10 +49,21 @@ python src/model_cplex.py
 python src/validator.py
 ```
 ### Servidor DIICC (`chome.inf.udec.cl`)
-Desde red UdeC:
+El servidor ya tiene configurado `.venv` (Python 3.12) con **Gurobi 14** (licencia WLS en `~/gurobi.lic`) y **CPLEX 22.2.0 Académico** (`~/cplex_academic`). No es necesario reinstalar paquetes.
+1. Conectarse (desde red UdeC o VPN institucional; la clave de `grupo04` está en `credenciales_servidor.txt`):
 ```bash
 ssh grupo04@chome.inf.udec.cl
-tmux new -s evrptw
+```
+2. Entrar al proyecto, actualizar código y activar el entorno:
+```bash
+cd ~/evrptw-optimizacion
+git pull
+source .venv/bin/activate
+```
+3. Para experimentos largos, usar `tmux` (evita que se corten si se cierra el SSH):
+```bash
+tmux new -s evrptw          # crear sesión (Ctrl+B luego D para desconectarse sin detenerla)
+tmux attach -t evrptw       # volver a la sesión
 ```
 
 ##  Estado de avance
