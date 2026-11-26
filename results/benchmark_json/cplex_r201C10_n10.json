@@ -1,0 +1,162 @@
+{
+  "solver": "CPLEX",
+  "instance": "r201C10",
+  "n_customers": 10,
+  "num_vehicles_available": 3,
+  "vehicles_used": 3,
+  "status": "OPTIMAL",
+  "best_objective": 217.6754,
+  "best_bound": 217.6754,
+  "mip_gap_pct": 0.0,
+  "cpu_time_sec": 3.6667,
+  "nodes_explored": 7594,
+  "routes": [
+    {
+      "vehicle": 0,
+      "route_distance": 95.9442,
+      "recharges_count": 1,
+      "sequence": [
+        {
+          "node_id": 0,
+          "string_id": "D0",
+          "type": "d",
+          "arrival_time": 0.0,
+          "battery_soc": 60.63
+        },
+        {
+          "node_id": 1,
+          "string_id": "C77",
+          "type": "c",
+          "arrival_time": 86.0,
+          "battery_soc": 40.9323
+        },
+        {
+          "node_id": 2,
+          "string_id": "C50",
+          "type": "c",
+          "arrival_time": 507.0,
+          "battery_soc": 33.7212
+        },
+        {
+          "node_id": 13,
+          "string_id": "S5_copy1",
+          "type": "f",
+          "arrival_time": 541.2074,
+          "battery_soc": 0.0
+        },
+        {
+          "node_id": 5,
+          "string_id": "C32",
+          "type": "c",
+          "arrival_time": 580.8156,
+          "battery_soc": 34.9285
+        },
+        {
+          "node_id": 6,
+          "string_id": "C31",
+          "type": "c",
+          "arrival_time": 608.2799,
+          "battery_soc": 17.4642
+        },
+        {
+          "node_id": 19,
+          "string_id": "D0_end",
+          "type": "d",
+          "arrival_time": 1000.0,
+          "battery_soc": 0.0
+        }
+      ]
+    },
+    {
+      "vehicle": 1,
+      "route_distance": 12.6491,
+      "recharges_count": 0,
+      "sequence": [
+        {
+          "node_id": 0,
+          "string_id": "D0",
+          "type": "d",
+          "arrival_time": 0.0,
+          "battery_soc": 60.63
+        },
+        {
+          "node_id": 4,
+          "string_id": "C28",
+          "type": "c",
+          "arrival_time": 357.0,
+          "battery_soc": 6.3246
+        },
+        {
+          "node_id": 19,
+          "string_id": "D0_end",
+          "type": "d",
+          "arrival_time": 1000.0,
+          "battery_soc": 0.0
+        }
+      ]
+    },
+    {
+      "vehicle": 2,
+      "route_distance": 109.0821,
+      "recharges_count": 1,
+      "sequence": [
+        {
+          "node_id": 0,
+          "string_id": "D0",
+          "type": "d",
+          "arrival_time": 0.0,
+          "battery_soc": 60.63
+        },
+        {
+          "node_id": 8,
+          "string_id": "C72",
+          "type": "c",
+          "arrival_time": 108.9311,
+          "battery_soc": 38.1578
+        },
+        {
+          "node_id": 10,
+          "string_id": "C100",
+          "type": "c",
+          "arrival_time": 148.0,
+          "battery_soc": 9.0889
+        },
+        {
+          "node_id": 15,
+          "string_id": "S13_copy1",
+          "type": "f",
+          "arrival_time": 163.0,
+          "battery_soc": 0.0
+        },
+        {
+          "node_id": 7,
+          "string_id": "C84",
+          "type": "c",
+          "arrival_time": 314.0,
+          "battery_soc": 47.1764
+        },
+        {
+          "node_id": 3,
+          "string_id": "C18",
+          "type": "c",
+          "arrival_time": 509.6822,
+          "battery_soc": 26.3594
+        },
+        {
+          "node_id": 9,
+          "string_id": "C94",
+          "type": "c",
+          "arrival_time": 534.0,
+          "battery_soc": 12.0416
+        },
+        {
+          "node_id": 19,
+          "string_id": "D0_end",
+          "type": "d",
+          "arrival_time": 1000.0,
+          "battery_soc": 0.0
+        }
+      ]
+    }
+  ]
+}

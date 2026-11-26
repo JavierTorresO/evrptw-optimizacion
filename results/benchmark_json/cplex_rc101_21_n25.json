@@ -1,0 +1,14 @@
+{
+  "solver": "CPLEX",
+  "instance": "rc101_21",
+  "n_customers": 25,
+  "num_vehicles_available": 7,
+  "vehicles_used": 0,
+  "status": "MEM_LIMIT",
+  "best_objective": null,
+  "best_bound": 205.6278,
+  "mip_gap_pct": null,
+  "cpu_time_sec": 698.4874,
+  "nodes_explored": 0,
+  "routes": []
+}
