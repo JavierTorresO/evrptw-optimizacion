@@ -1,7 +1,7 @@
+from __future__ import annotations
 import json
 from pathlib import Path
 from docplex.mp.model import Model
-
 from parser import load_evrptw_instance, build_arcs
 
 
