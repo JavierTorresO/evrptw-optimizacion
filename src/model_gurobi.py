@@ -144,13 +144,13 @@ def solve_evrptw_gurobi(
     # 6 & 7. Causalidad temporal (clientes/depósito vs estaciones de recarga)
     for (i, j) in arcs:
         for k in K:
-            if i in [depot_start] + V_C:
+            if i == depot_start or i in V_C_set:
                 s_i = nodes[i]["service_time"]
                 model.addConstr(
                     T[j, k] >= T[i, k] + s_i + time[(i, j)] - M1[(i, j)] * (1 - x[i, j, k]),
                     name=f"time_cust_{i}_{j}_{k}",
                 )
-            elif i in V_R:
+            elif i in V_R_set:
                 model.addConstr(
                     T[j, k] >= T[i, k] + g_rate * (Q_bat - Y[i, k]) + time[(i, j)] - M2[(i, j)] * (1 - x[i, j, k]),
                     name=f"time_stat_{i}_{j}_{k}",
@@ -159,12 +159,12 @@ def solve_evrptw_gurobi(
     # 9 & 10. Consumo de batería por arco
     for (i, j) in arcs:
         for k in K:
-            if i in [depot_start] + V_R:
+            if i == depot_start or i in V_R_set:
                 model.addConstr(
                     Y[j, k] <= Q_bat - h_rate * dist[(i, j)] * x[i, j, k],
                     name=f"bat_full_{i}_{j}_{k}",
                 )
-            elif i in V_C:
+            elif i in V_C_set:
                 model.addConstr(
                     Y[j, k] <= Y[i, k] - h_rate * dist[(i, j)] * x[i, j, k] + Q_bat * (1 - x[i, j, k]),
                     name=f"bat_cust_{i}_{j}_{k}",
