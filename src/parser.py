@@ -141,6 +141,38 @@ def load_evrptw_instance(filepath: str, station_copies: int = 2, max_customers: 
         "velocity": velocity,
     }
 
+def build_arcs(V_R, nodes, dist, time, Q_bat, h_rate, depot_start, depot_end, V_out, V_in) -> set:
+    arcs = []
+    for i in V_out:
+        e_i = nodes[i]["ready_time"]
+        s_i = nodes[i]["service_time"]
+        for j in V_in:
+            if (i == j) or (i == depot_start and j == depot_end):
+                continue
+            
+            # Evitar saltos entre la misma estacion
+            if i in V_R and j in V_R:
+                base_i = nodes[i]["string_id"].split("_copy")[0]
+                base_j = nodes[j]["string_id"].split("_copy")[0]
+                if base_i == base_j:
+                    continue
+
+			# Evitar salir del deposito a una estacion en la misma cordenada (bateria al 100)
+            if i == depot_start and j in V_R and dist[(i, j)] == 0.0:
+                continue
+
+			# Poda por bateria, imposible recorrer (i, j) con carga completa
+            if h_rate * dist[(i, j)] > Q_bat:
+                continue
+
+            # Poda por time window: si no llega de i a j
+            if e_i + s_i + time[(i, j)] > nodes[j]["due_date"]:
+                continue
+            arcs.append((i, j))
+
+    # set para evitar lookups O(n)
+    arcs = set(arcs)
+    return arcs
 
 if __name__ == "__main__":
     # Prueba rápida del parser

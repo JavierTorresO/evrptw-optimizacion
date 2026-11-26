@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from docplex.mp.model import Model
 
-from parser import load_evrptw_instance
+from parser import load_evrptw_instance, build_arcs
 
 
 def solve_evrptw_cplex(
@@ -49,30 +49,21 @@ def solve_evrptw_cplex(
     m = num_vehicles if num_vehicles is not None else len(V_C)
     K = list(range(m))
 
-    arcs = []
-    for i in V_out:
-        for j in V_in:
-            if i == j:
-                continue
-            if i == depot_start and j == depot_end:
-                continue
-            if i in V_R and j in V_R:
-                base_i = nodes[i]["string_id"].split("_copy")[0]
-                base_j = nodes[j]["string_id"].split("_copy")[0]
-                if base_i == base_j:
-                    continue
-            arcs.append((i, j))
+    arcs = build_arcs(V_R, nodes, dist, time, Q_bat, h_rate, depot_start, depot_end, V_out, V_in)
 
     # Precalcular cotas Big-M ajustadas
+    V_C_set = set(V_C)
+    V_R_set = set(V_R)
+
     M1 = {}
     M2 = {}
     for i, j in arcs:
         e_j = nodes[j]["ready_time"]
-        if i in [depot_start] + V_C:
-            l_i = nodes[i]["due_date"]
+        if i == depot_start or i in V_C_set:
+            l_i = 0.0 if i == depot_start else nodes[i]["due_date"]
             s_i = nodes[i]["service_time"]
             M1[(i, j)] = max(0.0, l_i + s_i + time[(i, j)] - e_j)
-        elif i in V_R:
+        elif i in V_R_set:
             l_r = nodes[i]["due_date"]
             M2[(i, j)] = max(0.0, l_r + g_rate * Q_bat + time[(i, j)] - e_j)
 

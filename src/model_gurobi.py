@@ -3,7 +3,7 @@ from pathlib import Path
 import gurobipy as gp
 from gurobipy import GRB
 
-from parser import load_evrptw_instance
+from parser import load_evrptw_instance, build_arcs
 
 
 def solve_evrptw_gurobi(
@@ -51,30 +51,21 @@ def solve_evrptw_gurobi(
     K = list(range(m))
 
     # Construir arcos válidos (evita bucles i==j, viaje vacío 0->end y saltos entre copias de la misma estación)
-    arcs = []
-    for i in V_out:
-        for j in V_in:
-            if i == j:
-                continue
-            if i == depot_start and j == depot_end:
-                continue
-            if i in V_R and j in V_R:
-                base_i = nodes[i]["string_id"].split("_copy")[0]
-                base_j = nodes[j]["string_id"].split("_copy")[0]
-                if base_i == base_j:
-                    continue
-            arcs.append((i, j))
-
+    arcs = build_arcs(V_R, nodes, dist, time, Q_bat, h_rate, depot_start, depot_end, V_out, V_in)
+    
     # Precalcular cotas Big-M ajustadas
+    V_C_set = set(V_C)
+    V_R_set = set(V_R)
+
     M1 = {}
     M2 = {}
     for i, j in arcs:
         e_j = nodes[j]["ready_time"]
-        if i in [depot_start] + V_C:
-            l_i = nodes[i]["due_date"]
+        if i == depot_start or i in V_C_set:
+            l_i = 0.0 if i == depot_start else nodes[i]["due_date"]
             s_i = nodes[i]["service_time"]
             M1[(i, j)] = max(0.0, l_i + s_i + time[(i, j)] - e_j)
-        elif i in V_R:
+        elif i in V_R_set:
             l_r = nodes[i]["due_date"]
             M2[(i, j)] = max(0.0, l_r + g_rate * Q_bat + time[(i, j)] - e_j)
 
@@ -112,7 +103,7 @@ def solve_evrptw_gurobi(
     # 1. Visita única a cada cliente
     for i in V_C:
         model.addConstr(
-            gp.quicksum(x[i, j, k] for k in K for j in V_in if (i, j) in x.keys() or (i, j) in arcs) == 1,
+            gp.quicksum(x[i, j, k] for k in K for j in V_in if (i, j) in arcs) == 1,
             name=f"visit_cust_{i}",
         )
 
@@ -278,6 +269,8 @@ def solve_evrptw_gurobi(
         json.dump(result, f, indent=2, ensure_ascii=False)
 
     return result
+
+
 
 
 if __name__ == "__main__":
