@@ -16,8 +16,6 @@ from validator import validate_solution
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Caso ilustrativo: familia mixta, 15 clientes, 2 rutas y 6 recargas;
-# ambos solvers certificaron el óptimo en el benchmark.
 INSTANCE_FILE = ROOT / "data" / "rc202C15.txt"
 
 RESULT_FILE = (
@@ -148,7 +146,7 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
     colores = plt.get_cmap("tab10")
     n_rutas = len(result["routes"])
 
-    # Dibuja las rutas con flechas curvas (una curvatura distinta por ruta)
+    # Dibuja las rutas con flechas curvas
     for index, route in enumerate(result["routes"]):
         color = colores(index % 10)
         sequence = route["sequence"]
@@ -1144,7 +1142,7 @@ def graficar_incumbent_cota(
     else:
         y_leyenda = 0.015
 
-    # Leyenda justo encima de la nota
+    # Leyenda encima de la nota
     fig.legend(
         handles=leyenda,
         loc="lower center",
@@ -1155,7 +1153,7 @@ def graficar_incumbent_cota(
         markerscale=1.6,
     )
 
-    # Los gráficos empiezan sobre la leyenda
+    # Ajustar gráficos empiezan sobre la leyenda
     fig.tight_layout(rect=[0, y_leyenda + 0.06, 1, 0.93])
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
