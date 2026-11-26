@@ -10,6 +10,7 @@ def solve_evrptw_cplex(
     num_vehicles: int | None = None,
     time_limit: float = 3600.0,
     mip_gap: float = 0.0,
+    threads: int = 8,
     output_dir: str = "results",
     verbose: bool = True,
 ) -> dict:
@@ -71,7 +72,8 @@ def solve_evrptw_cplex(
     mdl = Model(name=f"EVRPTW_CPLEX_{data['instance_name']}_n{len(V_C)}")
     mdl.set_time_limit(time_limit)
     mdl.parameters.mip.tolerances.mipgap = mip_gap
-
+    mdl.parameters.threads = threads
+    
     # Variables de decisión
     x_keys = [(i, j, k) for (i, j) in arcs for k in K]
     x = mdl.binary_var_dict(x_keys, name="x")

@@ -12,6 +12,7 @@ def solve_evrptw_gurobi(
     num_vehicles: int | None = None,
     time_limit: float = 3600.0,
     mip_gap: float = 0.0,
+    threads: int = 8,
     output_dir: str = "results",
     verbose: bool = True,
 ) -> dict:
@@ -75,6 +76,7 @@ def solve_evrptw_gurobi(
     model.Params.TimeLimit = time_limit
     model.Params.MIPGap = mip_gap
     model.Params.OutputFlag = 1 if verbose else 0
+    model.Params.Threads = threads
 
     # Variables de decisión
     x = model.addVars(arcs, K, vtype=GRB.BINARY, name="x")
