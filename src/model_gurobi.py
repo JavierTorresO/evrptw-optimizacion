@@ -247,6 +247,8 @@ def solve_evrptw_gurobi(
                 }
             )
 
+    # Si una instancia llega al limite sin solucion, se guarda la cota inferior igual
+    has_bound = model.Status in (GRB.OPTIMAL, GRB.TIME_LIMIT) and model.ObjBound < GRB.INFINITY
     result = {
         "solver": "Gurobi",
         "instance": data["instance_name"],
@@ -255,7 +257,7 @@ def solve_evrptw_gurobi(
         "vehicles_used": len(routes),
         "status": status_str,
         "best_objective": round(float(model.ObjVal), 4) if model.SolCount > 0 else None,
-        "best_bound": round(float(model.ObjBound), 4) if model.SolCount > 0 else None,
+        "best_bound": round(float(model.ObjBound), 4) if has_bound else None,
         "mip_gap_pct": round(float(model.MIPGap) * 100.0, 4) if model.SolCount > 0 else None,
         "cpu_time_sec": round(float(model.Runtime), 4),
         "nodes_explored": int(model.NodeCount),

@@ -157,11 +157,11 @@ def build_arcs(V_R, nodes, dist, time, Q_bat, h_rate, depot_start, depot_end, V_
                 if base_i == base_j:
                     continue
 
-			# Evitar salir del deposito a una estacion en la misma cordenada (bateria al 100)
+            # Evitar salir del deposito a una estacion en la misma cordenada (bateria al 100)
             if i == depot_start and j in V_R and dist[(i, j)] == 0.0:
                 continue
 
-			# Poda por bateria, imposible recorrer (i, j) con carga completa
+            # Poda por bateria, imposible recorrer (i, j) con carga completa
             if h_rate * dist[(i, j)] > Q_bat:
                 continue
 

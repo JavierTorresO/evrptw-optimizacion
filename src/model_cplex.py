@@ -241,6 +241,8 @@ def solve_evrptw_cplex(
                 }
             )
 
+    # Si una instancia llega al limite sin solucion, se guarda la cota inferior igual
+    has_bound = status_str in ("OPTIMAL", "TIME_LIMIT") and details.best_bound is not None
     result = {
         "solver": "CPLEX",
         "instance": data["instance_name"],
@@ -249,7 +251,7 @@ def solve_evrptw_cplex(
         "vehicles_used": len(routes),
         "status": status_str,
         "best_objective": round(float(sol.get_objective_value()), 4) if sol is not None else None,
-        "best_bound": round(float(details.best_bound), 4) if sol is not None else None,
+        "best_bound": round(float(details.best_bound), 4) if has_bound else None,
         "mip_gap_pct": round(float(details.mip_relative_gap) * 100.0, 4) if sol is not None else None,
         "cpu_time_sec": round(float(details.time), 4),
         "nodes_explored": int(details.nb_nodes_processed),
