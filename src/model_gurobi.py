@@ -77,6 +77,7 @@ def solve_evrptw_gurobi(
     model.Params.MIPGap = mip_gap
     model.Params.OutputFlag = 1 if verbose else 0
     model.Params.Threads = threads
+    model.Params.SoftMemLimit = 8.0
 
     # Variables de decisión
     x = model.addVars(arcs, K, vtype=GRB.BINARY, name="x")
@@ -186,6 +187,7 @@ def solve_evrptw_gurobi(
     status_map = {
         GRB.OPTIMAL: "OPTIMAL",
         GRB.TIME_LIMIT: "TIME_LIMIT",
+        GRB.MEM_LIMIT: "MEM_LIMIT",
         GRB.INFEASIBLE: "INFEASIBLE",
         GRB.INF_OR_UNBD: "INF_OR_UNBD",
         GRB.UNBOUNDED: "UNBOUNDED",
@@ -251,7 +253,7 @@ def solve_evrptw_gurobi(
             )
 
     # Si una instancia llega al limite sin solucion, se guarda la cota inferior igual
-    has_bound = model.Status in (GRB.OPTIMAL, GRB.TIME_LIMIT) and model.ObjBound < GRB.INFINITY
+    has_bound = model.Status in (GRB.OPTIMAL, GRB.TIME_LIMIT, GRB.MEM_LIMIT) and model.ObjBound < GRB.INFINITY
     result = {
         "solver": "Gurobi",
         "instance": data["instance_name"],
@@ -273,6 +275,7 @@ def solve_evrptw_gurobi(
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
+    model.dispose()
     return result
 
 

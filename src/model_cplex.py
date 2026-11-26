@@ -72,6 +72,8 @@ def solve_evrptw_cplex(
     mdl = Model(name=f"EVRPTW_CPLEX_{data['instance_name']}_n{len(V_C)}")
     mdl.set_time_limit(time_limit)
     mdl.parameters.mip.tolerances.mipgap = mip_gap
+    mdl.parameters.mip.limits.treememory = 8192
+    mdl.parameters.workmem = 2048
     mdl.parameters.threads = threads
     
     # Variables de decisión
@@ -181,6 +183,8 @@ def solve_evrptw_cplex(
         status_str = "OPTIMAL"
     elif "TIME" in raw_status:
         status_str = "TIME_LIMIT"
+    elif "MEM" in raw_status:
+        status_str = "MEM_LIMIT"
     elif "INFEASIBLE" in raw_status:
         status_str = "INFEASIBLE"
     else:
@@ -244,7 +248,7 @@ def solve_evrptw_cplex(
             )
 
     # Si una instancia llega al limite sin solucion, se guarda la cota inferior igual
-    has_bound = status_str in ("OPTIMAL", "TIME_LIMIT") and details.best_bound is not None
+    has_bound = status_str in ("OPTIMAL", "TIME_LIMIT", "MEM_LIMIT") and details.best_bound is not None
     result = {
         "solver": "CPLEX",
         "instance": data["instance_name"],
@@ -266,6 +270,7 @@ def solve_evrptw_cplex(
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
+    mdl.end()
     return result
 
 
