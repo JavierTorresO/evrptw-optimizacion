@@ -161,6 +161,10 @@ def build_arcs(V_R, nodes, dist, time, Q_bat, h_rate, depot_start, depot_end, V_
             if i == depot_start and j in V_R and dist[(i, j)] == 0.0:
                 continue
 
+            # Evitar recarga fantasma en una estacion en la misma coordenada justo antes de entrar al deposito
+            if i in V_R and j == depot_end and dist[(i, j)] == 0.0:
+                continue
+            
             # Poda por bateria, imposible recorrer (i, j) con carga completa
             if h_rate * dist[(i, j)] > Q_bat:
                 continue
