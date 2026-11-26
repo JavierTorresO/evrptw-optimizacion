@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from textwrap import fill
 
 import matplotlib.pyplot as plt
 from matplotlib.transforms import Bbox
@@ -15,16 +16,18 @@ from validator import validate_solution
 
 ROOT = Path(__file__).resolve().parents[1]
 
-INSTANCE_FILE = ROOT / "data" / "c101C10.txt"
+# Caso ilustrativo: familia mixta, 15 clientes, 2 rutas y 6 recargas;
+# ambos solvers certificaron el óptimo en el benchmark.
+INSTANCE_FILE = ROOT / "data" / "rc202C15.txt"
 
 RESULT_FILE = (
-    ROOT / "results" / "benchmark_json" / "gurobi_c101C10_n10.json"
+    ROOT / "results" / "benchmark_json" / "gurobi_rc202C15_n15.json"
 )
 OUTPUT_FILE = (
-    ROOT / "results" / "figuras" / "mapa_rutas_c101C10_gurobi.png"
+    ROOT / "results" / "figuras" / "mapa_rutas_rc202C15_gurobi.png"
 )
 SOC_OUTPUT_FILE = (
-    ROOT / "results" / "figuras" / "perfil_soc_c101C10_gurobi.png"
+    ROOT / "results" / "figuras" / "perfil_soc_rc202C15_gurobi.png"
 )
 
 CSV_FILE = ROOT / "results" / "comparacion_solvers.csv"
@@ -56,7 +59,7 @@ def obtener_coordenadas(data: dict, node_id: int) -> tuple[float, float]:
     return float(node["x"]), float(node["y"])
 
 
-def separar_etiquetas_clientes(etiquetas: list, puntos: list, ax) -> None:
+def separar_etiquetas_nodos(etiquetas: list, puntos: list, ax) -> None:
     """Reubica etiquetas cercanas sin modificar las coordenadas de los nodos."""
     fig = ax.figure
     fig.canvas.draw()
@@ -179,13 +182,13 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
     nodes = data["nodes"]
 
     # Dibuja los clientes
-    etiquetas_clientes = []
-    puntos_clientes = []
+    etiquetas_nodos = []
+    puntos_nodos = []
 
     for node_id in data["V_C"]:
         node = nodes[node_id]
         punto = (node["x"], node["y"])
-        puntos_clientes.append(punto)
+        puntos_nodos.append(punto)
         ax.scatter(
             node["x"],
             node["y"],
@@ -219,7 +222,7 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
                 "pad": 1,
             },
         )
-        etiquetas_clientes.append(etiqueta)
+        etiquetas_nodos.append(etiqueta)
 
     # Agrupa las copias de una misma estación para dibujarla una sola vez
     estaciones = {}
@@ -255,7 +258,7 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
         )
 
         if not comparte_deposito:
-            ax.annotate(
+            etiqueta = ax.annotate(
                 nombre,
                 (node["x"], node["y"]),
                 xytext=(5, -12),
@@ -263,6 +266,8 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
                 fontsize=8,
                 zorder=6,
             )
+            etiquetas_nodos.append(etiqueta)
+            puntos_nodos.append((node["x"], node["y"]))
 
     # Dibuja el depósito al final para que destaque si comparte coordenadas
     ax.scatter(
@@ -275,7 +280,7 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
         linewidths=1,
         zorder=7,
     )
-    ax.annotate(
+    etiqueta = ax.annotate(
         "Depósito",
         (deposito["x"], deposito["y"]),
         xytext=(8, -15),
@@ -284,6 +289,8 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
         fontweight="bold",
         zorder=8,
     )
+    etiquetas_nodos.append(etiqueta)
+    puntos_nodos.append((deposito["x"], deposito["y"]))
 
     # Leyenda: tipos de nodo y vehículos
     leyenda = [
@@ -358,7 +365,7 @@ def graficar_mapa_rutas(data: dict, result: dict, output_file: Path) -> None:
 
     fig.tight_layout(rect=[0, 0.08, 1, 0.91])
 
-    separar_etiquetas_clientes(etiquetas_clientes, puntos_clientes, ax)
+    separar_etiquetas_nodos(etiquetas_nodos, puntos_nodos, ax)
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_file, dpi=300, bbox_inches="tight")
@@ -491,7 +498,12 @@ def graficar_bateria_soc(data: dict, result: dict, output_file: Path) -> None:
         ),
     ]
 
-    fig.suptitle("Evolución del estado de carga de la batería", fontsize=14)
+    fig.suptitle(
+        f"Evolución del estado de carga de la batería\n"
+        f"{result['instance']} - {result['solver']} | "
+        f"{result['n_customers']} clientes",
+        fontsize=14,
+    )
     fig.legend(handles=leyenda, loc="lower center", ncol=2, frameon=False)
     fig.tight_layout(rect=[0, 0.08, 1, 0.94])
 
@@ -891,23 +903,26 @@ def graficar_mipgap(csv_path: Path, output_file: Path) -> None:
     ]
 
     fig.suptitle("Comparación de MIPGap: Gurobi y CPLEX", fontsize=18)
+    # Reserva filas distintas para leyenda y nota, fuera de los ejes.
+    nota = fill(
+        "Sin MIPGap por falta de incumbent: " + ", ".join(gaps_sin_incumbent),
+        width=140,
+    ) if gaps_sin_incumbent else ""
+    alto_nota = (len(nota.splitlines()) * 14 / 72 / fig.get_figheight())
+    base_leyenda = 0.025 + alto_nota + (0.025 if nota else 0)
     fig.legend(
         handles=leyenda_solver + leyenda_estado,
         loc="lower center",
+        bbox_to_anchor=(0.5, base_leyenda),
         ncol=5,
         frameon=False,
         fontsize=13,
         markerscale=1.6,
     )
 
-    if gaps_sin_incumbent:
-        nota = "Sin MIPGap por falta de incumbent: " + ", ".join(
-            gaps_sin_incumbent
-        )
-        fig.text(0.5, 0.015, nota, ha="center", fontsize=9)
-        fig.tight_layout(rect=[0, 0.19, 1, 0.93])
-    else:
-        fig.tight_layout(rect=[0, 0.12, 1, 0.93])
+    if nota:
+        fig.text(0.5, 0.025, nota, ha="center", va="bottom", fontsize=11)
+    fig.tight_layout(rect=[0, base_leyenda + 0.07, 1, 0.93])
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_file, dpi=300, bbox_inches="tight")
