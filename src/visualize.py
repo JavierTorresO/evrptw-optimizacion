@@ -512,7 +512,8 @@ def graficar_bateria_soc(data: dict, result: dict, output_file: Path) -> None:
     plt.close(fig)
     print(f"Gráfico SoC guardado en: {output_file}")
 
-LIMITE_TIEMPO = 3600
+# Límites usados en las corridas guardadas del benchmark.
+LIMITES_TIEMPO_POR_ESCALA = {"n=10": 3600, "n=15": 3600, "n=25": 1800}
 
 def graficar_tiempos(csv_path: Path, output_file: Path) -> None:
     with open(csv_path, "r", encoding="utf-8", newline="") as file:
@@ -632,24 +633,25 @@ def graficar_tiempos(csv_path: Path, output_file: Path) -> None:
                 zorder=2,
             )
 
-        # Línea del límite de tiempo
+        # Línea del límite de tiempo utilizado en esta escala.
+        limite_tiempo = LIMITES_TIEMPO_POR_ESCALA[escala]
         ax.axhline(
-            LIMITE_TIEMPO,
+            limite_tiempo,
             color="#C62828",
             linestyle="--",
             linewidth=1,
             zorder=1,
         )
-        if ax is axes[0]:
-            ax.text(
-                0.01,
-                LIMITE_TIEMPO,
-                " límite",
-                color="#C62828",
-                fontsize=8,
-                transform=ax.get_yaxis_transform(),
-                va="bottom",
-            )
+        ax.text(
+            0.99,
+            limite_tiempo,
+            f" límite: {limite_tiempo} s",
+            color="#C62828",
+            fontsize=8,
+            transform=ax.get_yaxis_transform(),
+            ha="right",
+            va="bottom",
+        )
 
         # Resumen en el título: cuántas veces ganó Gurobi
         gana_g = sum(1 for g, c in pares if g[1] <= c[1])
@@ -842,23 +844,30 @@ def graficar_mipgap(csv_path: Path, output_file: Path) -> None:
                     (valores_par["Gurobi"], valores_par["CPLEX"])
                 )
 
-        # Conector con el color del solver que tiene menor gap
+        # Los empates en el gap reportado usan un conector neutro.
         for gurobi, cplex in pares:
-            gana_gurobi = gurobi[1] <= cplex[1]
+            if gurobi[1] == cplex[1]:
+                color_conector = "#777777"
+            else:
+                color_conector = colores_solver[
+                    "Gurobi" if gurobi[1] < cplex[1] else "CPLEX"
+                ]
             ax.plot(
                 [gurobi[0], cplex[0]],
                 [gurobi[1], cplex[1]],
-                color=colores_solver["Gurobi" if gana_gurobi else "CPLEX"],
+                color=color_conector,
                 linewidth=1.8,
                 alpha=0.6,
                 zorder=2,
             )
 
-        # Resumen en el título
-        gana_g = sum(1 for g, c in pares if g[1] <= c[1])
+        # Solo se comparan instancias con gap disponible en ambos solvers.
+        gana_g = sum(1 for g, c in pares if g[1] < c[1])
+        gana_c = sum(1 for g, c in pares if c[1] < g[1])
+        empates = sum(1 for g, c in pares if g[1] == c[1])
         ax.set_title(
-            f"{escala} ({len(instancias)} inst.) | "
-            f"Gurobi menor gap: {gana_g}/{len(pares)}",
+            f"{escala} ({len(instancias)} inst.; comparables: {len(pares)})\n"
+            f"Menor gap: Gurobi {gana_g} | CPLEX {gana_c} | Empates {empates}",
             fontsize=13,
             pad=26,
         )
