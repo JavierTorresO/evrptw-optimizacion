@@ -39,7 +39,7 @@ git clone https://github.com/JavierTorresO/evrptw-optimizacion.git
 cd evrptw-optimizacion
 python -m venv .venv
 source .venv/bin/activate        # Windows: .\.venv\Scripts\Activate.ps1
-pip install gurobipy docplex cplex numpy pandas matplotlib
+pip install -r requirements.txt
 ```
 Pruebas individuales:
 ```bash
