@@ -75,9 +75,9 @@ tmux attach -t evrptw       # volver a la sesión
 | **T3** | Formulación matemática PLEM y cotas Big-M (`modelo_matematico.md`) | ✅ |
 | **T4** | Modelos en Gurobi y CPLEX (`model_gurobi.py`, `model_cplex.py`) | ✅ |
 | **T5** | Validación operativa (`src/validator.py`) y batería de instancias (≥3 por familia) | ✅ |
-| **T6** | Benchmarking Gurobi vs. CPLEX en `chome` (`src/benchmark.py`) | Pendiente |
-| **T7** | Análisis de supuestos, limitaciones y escalabilidad (`analisis_resultados.md`) | Pendiente |
-| **T8** | Visualización de rutas, SoC y gráficos comparativos (`src/visualize.py`) | Pendiente |
+| **T6** | Benchmarking Gurobi vs. CPLEX en `chome` (`src/benchmark.py`) | ✅ |
+| **T7** | Análisis de supuestos, limitaciones y escalabilidad (`analisis_resultados.md`) | ✅ |
+| **T8** | Visualización de rutas, SoC y gráficos comparativos (`src/visualize.py`) | ✅ |
 | **T9** | Presentación final (~15 min) y guion del equipo | Pendiente |
 
 
